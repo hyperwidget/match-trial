@@ -1,0 +1,42 @@
+.row {
+    margin-bottom: -4px;
+}
+
+.tile {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+.selected{
+    border: 2px solid white;
+}
+
+.tile-color-grey {
+    background-color: grey;
+}
+
+.tile-color-green {
+    background-color: green;
+}
+
+.tile-color-red {
+    background-color: red;
+}
+
+.tile-color-orange {
+    background-color: orange;
+}
+
+.tile-color-yellow {
+    background-color: yellow;
+}
+
+.removing{
+    background-color: black !important;
+}
+
+.blank{
+    background-color: white !important;
+}
