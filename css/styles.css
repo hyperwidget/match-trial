@@ -1,5 +1,12 @@
-.row {
+#board-container {
+    display: flex;
+}
+
+.column {
     margin-bottom: -4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
 .tile {
@@ -9,7 +16,7 @@
     border: 1px solid black;
 }
 
-.selected{
+.selected {
     border: 2px solid white;
 }
 
@@ -33,10 +40,10 @@
     background-color: yellow;
 }
 
-.removing{
+.removing {
     background-color: black !important;
 }
 
-.blank{
+.blank {
     background-color: white !important;
 }

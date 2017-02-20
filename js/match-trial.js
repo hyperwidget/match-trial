@@ -68,16 +68,16 @@ class Game {
     let container = document.getElementById('board-container');
     $(container).empty();
     let rows = [];
-    for (var i = 0; i < board.rows; i++) {
+    for (var i = 0; i < board.columns; i++) {
       let tiles = [];
       let row = $('<div>');
-      $(row).addClass('row');
-      for (var j = 0; j < board.columns; j++) {
+      $(row).addClass('column');
+      for (var j = 0; j < board.rows; j++) {
         let node = $('<div>');
         node.addClass('tile');
-        node.addClass('tile-color-' + board.tiles[i][j].type.color);
-        node.attr('data-x', i);
-        node.attr('data-y', j);
+        node.addClass('tile-color-' + board.tiles[j][i].type.color);
+        node.attr('data-x', j);
+        node.attr('data-y', i);
         tiles.push(node);
       }
       $(row).append(tiles);
@@ -281,19 +281,22 @@ class Game {
           let rowNum = j;
           // Loop from bottom to top
           if (board.tiles[rowNum][colNum].type === blankTile) {
-            // Insert new random tile
-            board.tiles[rowNum][colNum].type = this.getRandomTile();
-            this.drawTile(rowNum, colNum);
-          } else {
-            // Swap tile to shift it
-            var shift = board.tiles[rowNum][colNum].shift;
-            if (shift > 0) {
-              this.swapTiles(rowNum, colNum, rowNum - shift, colNum)
+            let tileToDrop = null;
+            for (var x = rowNum; x >= 0; x--) {
+              let tile = board.tiles[x][colNum];
+              if (tileToDrop === null && tile.type !== blankTile) {
+                tileToDrop = { tile: tile, x: x }
+              }
             }
+            if (tileToDrop !== null) {
+              this.swapTiles(rowNum, colNum, tileToDrop.x, colNum);
+            } else {
+              board.tiles[rowNum][colNum].type = this.getRandomTile();
+            }
+            this.drawTile(rowNum, colNum);
           }
 
           // Reset shift
-          board.tiles[rowNum][colNum].shift = 0;
           resolve();
         }
       }
@@ -405,7 +408,7 @@ const selectTile = function(tile) {
 
 const postSwap = function() {
   game.findClusters()
-    .then(() => game.resolveClusters(500))
+    .then(() => game.resolveClusters(250))
     .then(() => game.findMoves())
     .then(() => {
       if (moves.length === 0) {
