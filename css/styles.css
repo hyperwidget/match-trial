@@ -16,6 +16,32 @@
     border: 1px solid black;
 }
 
+.dropping {
+    animation: DROPPING .5s;
+}
+
+@keyframes DROPPING {
+    from {
+        transform: translate(0, 0);
+    }
+    to {
+        transform: translate(0, 32px);
+    }
+}
+
+.collapsing {
+    animation: COLLAPSING .5s;
+}
+
+@keyframes COLLAPSING {
+    from {
+        height: 30px;
+    }
+    to {
+        height: 0px;
+    }
+}
+
 .selected {
     border: 2px solid white;
 }

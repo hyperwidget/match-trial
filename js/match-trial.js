@@ -1,6 +1,6 @@
 let board = {
-  rows: 4,
-  columns: 4,
+  rows: 8,
+  columns: 8,
   tileWidth: 50,
   tileHeight: 50,
   tiles: [],
@@ -10,6 +10,8 @@ let board = {
     row: 0
   }
 }
+
+let replacementCells = [];
 
 const colors = [{
     color: 'green'
@@ -72,18 +74,67 @@ class Game {
       let tiles = [];
       let row = $('<div>');
       $(row).addClass('column');
+      $(row).attr('data-y', i);
       for (var j = 0; j < board.rows; j++) {
-        let node = $('<div>');
-        node.addClass('tile');
-        node.addClass('tile-color-' + board.tiles[j][i].type.color);
-        node.attr('data-x', j);
-        node.attr('data-y', i);
-        tiles.push(node);
+        tiles.push(this.createTile(board.tiles[j][i], j, i));
       }
       $(row).append(tiles);
       rows.push(row);
     }
     $(container).append(rows);
+  }
+
+  createTile(tile, x, y) {
+    let node = $('<div>');
+    node.addClass('tile');
+    node.addClass(`tile-color-${tile.type.color}`);
+    node.attr('data-x', x);
+    node.attr('data-y', y);
+    return node
+  }
+
+  dropCells(x, y) {
+    return new Promise((resolve, reject) => {
+      $('.blank').addClass('collapsing');
+      $('.collapsing')
+        .on("animationend",
+          (e) => {
+            e.target.remove();
+            let remaining = $('.collapsing');
+            if ($('.collapsing').length === 0) {
+              this.clearReplacements();
+              resolve();
+            }
+          });
+    });
+  }
+
+  createReplacementCells() {
+    return new Promise((resolve, reject) => {
+      for (var i = 0; i < board.columns; i++) {
+        for (var j = 0; j < replacementCells[i].length; j++) {
+          $(`.column[data-y='${i}']`).append(replacementCells[i][j]);
+        }
+      }
+      this.clearReplacements();
+      for (var i = 0; i < board.rows; i++) {
+        board.tiles[i] = [];
+        for (var j = 0; j < board.columns; j++) {
+          board.tiles[i][j] = {
+            type: new Date()
+          };
+          console.log(board.tiles[i][j])
+        }
+      }
+      resolve();
+    });
+  }
+
+  clearReplacements() {
+    console.log('clear');
+    for (var i = 0; i < board.columns; i++) {
+      replacementCells[i] = [];
+    }
   }
 
   updateBoard() {
@@ -106,7 +157,8 @@ class Game {
       this.findClusters();
       // delayTime: int, ms for timeouts for 'animations'
       this.removeClusters(delayTime)
-        .then(() => this.shiftTiles(delayTime))
+        .then(() => this.createReplacementCells())
+        .then(() => this.dropCells(delayTime))
         .then(() => this.findClusters())
         .then(() => {
           if (clusters.length > 0) {
@@ -247,6 +299,11 @@ class Game {
     }
   }
 
+  createReplacementTile(column) {
+    let tile = this.createTile({ type: this.getRandomTile() }, (replacementCells[column] + 1) * -1, column)
+    replacementCells[column][replacementCells[column].length] = tile;
+  }
+
   // delayTime: int, ms for timeouts for 'animations'
   removeClusters(delayTime) {
     return new Promise((resolve, reject) => {
@@ -261,9 +318,11 @@ class Game {
               if (tile.type === deletedTile) {
                 tile.type = blankTile;
                 this.drawTile(i, j);
+                this.createReplacementTile(j);
               }
             }
           }
+          console.log(replacementCells);
           setTimeout(function() {
             resolve();
           }, delayTime)
@@ -280,21 +339,21 @@ class Game {
         for (var j = board.rows - 1; j >= 0; j--) {
           let rowNum = j;
           // Loop from bottom to top
-          if (board.tiles[rowNum][colNum].type === blankTile) {
-            let tileToDrop = null;
-            for (var x = rowNum; x >= 0; x--) {
-              let tile = board.tiles[x][colNum];
-              if (tileToDrop === null && tile.type !== blankTile) {
-                tileToDrop = { tile: tile, x: x }
-              }
-            }
-            if (tileToDrop !== null) {
-              this.swapTiles(rowNum, colNum, tileToDrop.x, colNum);
-            } else {
-              board.tiles[rowNum][colNum].type = this.getRandomTile();
-            }
-            this.drawTile(rowNum, colNum);
-          }
+          // if (board.tiles[rowNum][colNum].type === blankTile) {
+          //   let tileToDrop = null;
+          //   for (var x = rowNum; x >= 0; x--) {
+          //     let tile = board.tiles[x][colNum];
+          //     if (tileToDrop === null && tile.type !== blankTile) {
+          //       tileToDrop = { tile: tile, x: x }
+          //     }
+          //   }
+          //   if (tileToDrop !== null) {
+          //     this.swapTiles(rowNum, colNum, tileToDrop.x, colNum);
+          //   } else {
+          //     board.tiles[rowNum][colNum].type = this.getRandomTile();
+          //   }
+          //   this.drawTile(rowNum, colNum);
+          // }
 
           // Reset shift
           resolve();
@@ -376,6 +435,7 @@ class Game {
         };
       }
     }
+    this.clearReplacements();
   }
 }
 
