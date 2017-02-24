@@ -1,5 +1,12 @@
 #board-container {
     display: flex;
+    height: 256px;
+    padding-bottom: 5px;
+    max-height: 256px;
+    overflow: hidden;
+    position: absolute;
+    left: 40%;
+    top: 20%;
 }
 
 .column {
@@ -12,6 +19,7 @@
 .tile {
     width: 30px;
     height: 30px;
+    min-height: 30px;
     display: inline-block;
     border: 1px solid black;
 }
@@ -30,14 +38,16 @@
 }
 
 .collapsing {
-    animation: COLLAPSING .5s;
+    animation: COLLAPSING 1s;
 }
 
 @keyframes COLLAPSING {
     from {
+        min-height: 30px;
         height: 30px;
     }
     to {
+        min-height: 0;
         height: 0px;
     }
 }
@@ -71,5 +81,6 @@
 }
 
 .blank {
+    border: none;
     background-color: white !important;
 }

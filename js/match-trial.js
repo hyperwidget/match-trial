@@ -13,22 +13,28 @@ let board = {
 
 let replacementCells = [];
 
-const colors = [{
-    color: 'green'
+const colors = {
+  0: {
+    color: 'green',
+    id: 0
   },
-  {
-    color: 'red'
+  1: {
+    color: 'red',
+    id: 1
   },
-  {
-    color: 'yellow'
+  2: {
+    color: 'yellow',
+    id: 2
   },
-  {
-    color: 'grey'
+  3: {
+    color: 'grey',
+    id: 3
   },
-  {
-    color: 'orange'
+  4: {
+    color: 'orange',
+    id: 4
   }
-];
+};
 
 const deletedTile = {
   color: 'black'
@@ -90,48 +96,55 @@ class Game {
     node.addClass(`tile-color-${tile.type.color}`);
     node.attr('data-x', x);
     node.attr('data-y', y);
+    node.attr('data-type', tile.type.id);
+    node.click(function(event) {
+      selectTile(event.target);
+    });
     return node
   }
 
   dropCells(x, y) {
     return new Promise((resolve, reject) => {
-      $('.blank').addClass('collapsing');
-      $('.collapsing')
+      $('.blank')
+        .addClass('collapsing')
         .on("animationend",
           (e) => {
             e.target.remove();
             let remaining = $('.collapsing');
             if ($('.collapsing').length === 0) {
-              this.clearReplacements();
+              this.reassignTiles();
               resolve();
             }
           });
     });
   }
 
+  reassignTiles() {
+    for (var j = 0; j < board.columns; j++) {
+      let i = board.rows - 1;
+      $(`.column[data-y=${j}] .tile`).get().reverse().forEach((cell) => {
+        if (parseInt($(cell).attr('data-x')) !== i) {
+          $(cell).attr('data-x', i);
+          board.tiles[i][j].type = colors[$(cell).attr('data-type')];
+        }
+        i--;
+      })
+    }
+  };
+
   createReplacementCells() {
     return new Promise((resolve, reject) => {
       for (var i = 0; i < board.columns; i++) {
         for (var j = 0; j < replacementCells[i].length; j++) {
-          $(`.column[data-y='${i}']`).append(replacementCells[i][j]);
+          $(`.column[data-y='${i}']`).prepend(replacementCells[i][j]);
         }
       }
       this.clearReplacements();
-      for (var i = 0; i < board.rows; i++) {
-        board.tiles[i] = [];
-        for (var j = 0; j < board.columns; j++) {
-          board.tiles[i][j] = {
-            type: new Date()
-          };
-          console.log(board.tiles[i][j])
-        }
-      }
       resolve();
     });
   }
 
   clearReplacements() {
-    console.log('clear');
     for (var i = 0; i < board.columns; i++) {
       replacementCells[i] = [];
     }
@@ -322,7 +335,6 @@ class Game {
               }
             }
           }
-          console.log(replacementCells);
           setTimeout(function() {
             resolve();
           }, delayTime)
@@ -483,7 +495,7 @@ const bindHandlers = function() {
   });
 }
 
-bindHandlers();
+// bindHandlers();
 
 const canSwap = function(x1, x2, y1, y2) {
   retVal = false;
