@@ -13,6 +13,12 @@ let board = {
 
 let replacementCells = [];
 
+let score = {
+  totalPoints: 0,
+  chain: 0,
+  recording: false
+}
+
 const colors = {
   0: {
     color: 'green',
@@ -55,25 +61,28 @@ class Game {
   }
 
   createLevel() {
-    let done = false;
-    while (!done) {
-      for (var i = 0; i < board.rows; i++) {
-        for (var j = 0; j < board.columns; j++) {
-          board.tiles[i][j].type = this.getRandomTile();
-        }
+    for (var i = 0; i < board.rows; i++) {
+      for (var j = 0; j < board.columns; j++) {
+        board.tiles[i][j].type = this.getRandomTile();
       }
-
-      this.resolveClusters();
-      this.findMoves();
-      if (moves.length > 0) {
-        done = true;
-      }
-      this.drawBoard();
     }
+
+    this.drawBoard();
+
+    this.resolveClusters()
+      .then(() => {
+        this.findMoves();
+        if (moves.length === 0) {
+          createLevel();
+        } else {
+          score.recording = true;
+          $('#board-container').show();
+        }
+      })
   }
 
   drawBoard() {
-    let container = document.getElementById('board-container');
+    let container = $('#board-container');
     $(container).empty();
     let rows = [];
     for (var i = 0; i < board.columns; i++) {
@@ -105,6 +114,9 @@ class Game {
 
   dropCells(x, y) {
     return new Promise((resolve, reject) => {
+      if (score.recording == true) {
+        this.addToScore($('.blank').length);
+      }
       $('.blank')
         .addClass('collapsing')
         .on("animationend",
@@ -175,12 +187,20 @@ class Game {
         .then(() => this.findClusters())
         .then(() => {
           if (clusters.length > 0) {
-            this.resolveClusters(delayTime);
+            score.chain++;
+            return this.resolveClusters()
+              .then(resolve);
           } else {
-            resolve();
+            score.chain = 0;
+            console.log(score.totalPoints);
+            return resolve();
           }
         });
     });
+  }
+
+  addToScore(count) {
+    score.totalPoints += ((score.chain + 1) * count);
   }
 
   findClusters(animate) {
@@ -342,38 +362,6 @@ class Game {
     });
   }
 
-  // Shift tiles and insert new tiles
-  shiftTiles() {
-    return new Promise((resolve, reject) => {
-      // Shift tiles
-      for (var i = 0; i < board.columns; i++) {
-        let colNum = i;
-        for (var j = board.rows - 1; j >= 0; j--) {
-          let rowNum = j;
-          // Loop from bottom to top
-          // if (board.tiles[rowNum][colNum].type === blankTile) {
-          //   let tileToDrop = null;
-          //   for (var x = rowNum; x >= 0; x--) {
-          //     let tile = board.tiles[x][colNum];
-          //     if (tileToDrop === null && tile.type !== blankTile) {
-          //       tileToDrop = { tile: tile, x: x }
-          //     }
-          //   }
-          //   if (tileToDrop !== null) {
-          //     this.swapTiles(rowNum, colNum, tileToDrop.x, colNum);
-          //   } else {
-          //     board.tiles[rowNum][colNum].type = this.getRandomTile();
-          //   }
-          //   this.drawTile(rowNum, colNum);
-          // }
-
-          // Reset shift
-          resolve();
-        }
-      }
-    });
-  }
-
   swapTiles(x1, y1, x2, y2) {
     return new Promise((resolve, reject) => {
       let typeSwap = board.tiles[x1][y1].type;
@@ -390,7 +378,6 @@ class Game {
   findMoves() {
     return new Promise((resolve, reject) => {
       moves = [];
-
       for (var i = 0; i < board.rows - 1; i++) {
         let rowNum = i;
         for (var j = 0; j < board.columns - 1; j++) {
