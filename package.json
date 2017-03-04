@@ -1,0 +1,18 @@
+{
+  "name": "match-trial",
+  "version": "1.0.0",
+  "main": "app/index.js",
+  "repository": "https://github.com/hyperwidget/match-trial.git",
+  "author": "Hunter Jansen <rawkamatic@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2"
+  }
+}
