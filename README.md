@@ -4,6 +4,9 @@ This is more or less a proof of concept around building a match 3 game using Jav
 
 A key thing I wanted to achieve with this was to make a match 3 using the DOM instead of canvas, particularly with flexbox. Beyond that, I didn't even want to use jQuery (but I did because I got tired of writing out document.findElementById, etc).
 
+## Demo ##
+Play it [here](http://hyperwidget.com/match-trial/) - opening your console helps too
+
 ## Special Thanks ##
 I wanted to toss out a special thanks / acknowledgement to an article I read [here](http://rembound.com/articles/how-to-make-a-match3-game-with-html5-canvas) just talking about match 3 logic that I used to get started with the basics of setting up a board and the basics of throwing together a match 3. While I ended up deviating from it significantly, it was a good read to get me started.
 
